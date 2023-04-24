@@ -21,10 +21,6 @@ const winningCombinations = [
   [2, 4, 6],
 ];
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 function isGameOver() {
   if (
     // Horizontal
@@ -40,8 +36,7 @@ function isGameOver() {
     (board[2] === "X" && board[4] === "X" && board[6] === "X")
   ) {
     console.log("You win!");
-    console.log("Reloading board...");
-    board.fill(undefined);
+    console.log("To reload board send a DELETE request to /status");
   } else if (
     // Horizontal
     (board[0] === "O" && board[1] === "O" && board[2] === "O") ||
@@ -56,12 +51,12 @@ function isGameOver() {
     (board[2] === "O" && board[4] === "O" && board[6] === "O")
   ) {
     console.log("You lose!");
-    console.log("Reloading board...");
-    board.fill(undefined);
+    console.log("To reload board send a DELETE request to /status");
+    
+
   } else{
     console.log("Draw!");
-    console.log("Reloading board...");
-    board.fill(undefined);
+    console.log("To reload board send a DELETE request to /status");
   }
 }
 
@@ -78,21 +73,66 @@ function iaPlays() {
   if (flag){
     isGameOver();
   } else {
+    let foundPlay = false;
     for (let i = 0; i < board.length; i++) {
+      //Horizontal
       if (board[i] === "X" && board[i+1] === "X" && board[i+2] === undefined) {
         pos = i+2;
+        foundPlay = true;
         break;
       } else if (board[i] === "X" && board[i+1] === undefined && board[i+2] === "X"){
         pos = i+1;
+        foundPlay = true;
         break;
       } else if (board[i] === undefined && board[i+1] === "X" && board[i+2] === "X"){
         pos = i;
+        foundPlay = true;
         break;
-      } else {
-        pos = Math.floor(Math.random() * 9);
+        //Vertical
+      } else if (board[i] === "X" && board[i+3] === "X" && board[i+6] === undefined){
+        pos = i+6;
+        foundPlay = true;
         break;
-      }
+      } else if (board[i] === "X" && board[i+3] === undefined && board[i+6] === "X"){
+        pos = i+3;
+        foundPlay = true;
+        break;
+      } else if (board[i] === undefined && board[i+3] === "X" && board[i+6] === "X"){
+        pos = i;
+        foundPlay = true;
+        break;
+        //Diagonal
+      } else if (board[i] === "X" && board[i+4] === "X" && board[i+8] === undefined){
+        pos = i+8;
+        foundPlay = true;
+        break;
+      } else if (board[i] === "X" && board[i+4] === undefined && board[i+8] === "X"){
+        pos = i+4;
+        foundPlay = true;
+        break;
+      } else if (board[i] === undefined && board[i+4] === "X" && board[i+8] === "X"){
+        pos = i;
+        foundPlay = true;
+        break;
+      } else if (board[i] === "X" && board[i+2] === "X" && board[i+4] === undefined){
+        pos = i+4;
+        foundPlay = true;
+        break;
+      } else if (board[i] === "X" && board[i+2] === undefined && board[i+4] === "X"){
+        pos = i+2;
+        foundPlay = true;
+        break;
+      } else if (board[i] === undefined && board[i+2] === "X" && board[i+4] === "X"){
+        pos = i;
+        foundPlay = true;
+        break;
+      } 
     }
+
+    if (!foundPlay) {
+      pos = Math.floor(Math.random() * 9);
+    }
+
 
     if (board[pos] === undefined) {
       board[pos] = "O";
@@ -118,6 +158,7 @@ app.post("/move/:pos", (req, res) => {
 
 app.delete("/status", (req, res) => {
   res.json("status deleted");
+  board.fill(undefined);
 });
 
 app.listen(port, () => {
